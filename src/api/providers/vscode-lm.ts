@@ -498,6 +498,7 @@ export class VsCodeLmHandler implements ApiHandler, SingleCompletionHandler {
 						: openAiModelInfoSaneDefaults.contextWindow,
 				supportsImages: this.client.vendor === "copilot" && this.client.family === "claude-3.5-sonnet", // Enable images specifically for Claude 3.5 Sonnet
 				supportsPromptCache: true,
+				supportsComputerUse: true,
 				inputPrice: 0,
 				outputPrice: 0,
 				description: `VSCode Language Model: ${modelId}`,
