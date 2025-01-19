@@ -496,7 +496,7 @@ export class VsCodeLmHandler implements ApiHandler, SingleCompletionHandler {
 					typeof this.client.maxInputTokens === "number"
 						? Math.max(0, this.client.maxInputTokens)
 						: openAiModelInfoSaneDefaults.contextWindow,
-				supportsImages: modelId.includes("claude-3") && modelId.includes("copilot"), // Enable images for Claude 3.x models
+				supportsImages: this.client.vendor === "copilot" && this.client.family === "claude-3.5-sonnet", // Enable images specifically for Claude 3.5 Sonnet
 				supportsPromptCache: true,
 				inputPrice: 0,
 				outputPrice: 0,
