@@ -1061,7 +1061,8 @@ export function normalizeApiConfiguration(apiConfiguration?: ApiConfiguration) {
 					...openAiModelInfoSaneDefaults,
 					supportsImages:
 						apiConfiguration?.vsCodeLmModelSelector?.vendor === "copilot" &&
-						apiConfiguration?.vsCodeLmModelSelector?.family?.includes("claude-3"), // Enable images for Claude 3.x models
+						apiConfiguration?.vsCodeLmModelSelector?.vendor === "copilot" &&
+						apiConfiguration?.vsCodeLmModelSelector?.family === "claude-3.5-sonnet", // Enable images specifically for Claude 3.5 Sonnet
 				},
 			}
 		default:
