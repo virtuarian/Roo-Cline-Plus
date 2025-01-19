@@ -496,7 +496,7 @@ export class VsCodeLmHandler implements ApiHandler, SingleCompletionHandler {
 					typeof this.client.maxInputTokens === "number"
 						? Math.max(0, this.client.maxInputTokens)
 						: openAiModelInfoSaneDefaults.contextWindow,
-				supportsImages: false, // VSCode Language Model API currently doesn't support image inputs
+				supportsImages: modelId.includes("claude-3") && modelId.includes("copilot"), // Enable images for Claude 3.x models
 				supportsPromptCache: true,
 				inputPrice: 0,
 				outputPrice: 0,

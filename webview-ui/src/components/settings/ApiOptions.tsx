@@ -1059,7 +1059,9 @@ export function normalizeApiConfiguration(apiConfiguration?: ApiConfiguration) {
 					: "",
 				selectedModelInfo: {
 					...openAiModelInfoSaneDefaults,
-					supportsImages: false, // VSCode LM API currently doesn't support images
+					supportsImages:
+						apiConfiguration?.vsCodeLmModelSelector?.vendor === "copilot" &&
+						apiConfiguration?.vsCodeLmModelSelector?.family?.includes("claude-3"), // Enable images for Claude 3.x models
 				},
 			}
 		default:

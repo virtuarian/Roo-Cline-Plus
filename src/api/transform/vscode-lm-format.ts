@@ -84,12 +84,18 @@ export function convertToVsCodeLmMessages(
 
 					// Convert non-tool messages to TextParts after tool messages
 					...nonToolMessages.map((part) => {
-						if (part.type === "image") {
+						if (part.type === "image" && part.source) {
+							// Convert base64 image to markdown format for VSCode
+							if (part.source.type === "base64" && part.source.media_type && part.source.data) {
+								const imageData = `data:${part.source.media_type};base64,${part.source.data}`
+								return new vscode.LanguageModelTextPart(`![image](${imageData})`)
+							}
+							// Fallback for unsupported image types
 							return new vscode.LanguageModelTextPart(
-								`[Image (${part.source?.type || "Unknown source-type"}): ${part.source?.media_type || "unknown media-type"} not supported by VSCode LM API]`,
+								`[Image (${part.source.type || "Unknown source-type"}): ${part.source.media_type || "unknown media-type"} - unsupported format]`,
 							)
 						}
-						return new vscode.LanguageModelTextPart(part.text)
+						return new vscode.LanguageModelTextPart("text" in part ? part.text : "")
 					}),
 				]
 
