@@ -106,12 +106,12 @@ export const GlobalFileNames = {
 	uiMessages: "ui_messages.json",
 	glamaModels: "glama_models.json",
 	openRouterModels: "openrouter_models.json",
-	mcpSettings: "cline_mcp_settings.json",
+	mcpSettings: "cline_plus_mcp_settings.json",
 }
 
 export class ClineProvider implements vscode.WebviewViewProvider {
-	public static readonly sideBarId = "roo-cline.SidebarProvider" // used in package.json as the view's id. This value cannot be changed due to how vscode caches views based on their id, and updating the id would break existing instances of the extension.
-	public static readonly tabPanelId = "roo-cline.TabPanelProvider"
+	public static readonly sideBarId = "roo-cline-plus.SidebarProvider"
+	public static readonly tabPanelId = "roo-cline-plus.TabPanelProvider"
 	private static activeInstances: Set<ClineProvider> = new Set()
 	private disposables: vscode.Disposable[] = []
 	private view?: vscode.WebviewView | vscode.WebviewPanel
@@ -376,8 +376,8 @@ export class ClineProvider implements vscode.WebviewViewProvider {
             <meta name="theme-color" content="#000000">
             <meta http-equiv="Content-Security-Policy" content="default-src 'none'; font-src ${webview.cspSource}; style-src ${webview.cspSource} 'unsafe-inline'; img-src ${webview.cspSource} data:; script-src 'nonce-${nonce}';">
             <link rel="stylesheet" type="text/css" href="${stylesUri}">
-			<link href="${codiconsUri}" rel="stylesheet" />
-            <title>Cline</title>
+<link href="${codiconsUri}" rel="stylesheet" />
+            <title>Cline Plus</title>
           </head>
           <body>
             <noscript>You need to enable JavaScript to run this app.</noscript>
@@ -1217,11 +1217,11 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 	// MCP
 
 	async ensureMcpServersDirectoryExists(): Promise<string> {
-		const mcpServersDir = path.join(os.homedir(), "Documents", "Cline", "MCP")
+		const mcpServersDir = path.join(os.homedir(), "Documents", "Cline-Plus", "MCP")
 		try {
 			await fs.mkdir(mcpServersDir, { recursive: true })
 		} catch (error) {
-			return "~/Documents/Cline/MCP" // in case creating a directory in documents fails for whatever reason (e.g. permissions) - this is fine since this path is only ever used in the system prompt
+			return "~/Documents/Cline-Plus/MCP" // in case creating a directory in documents fails for whatever reason (e.g. permissions) - this is fine since this path is only ever used in the system prompt
 		}
 		return mcpServersDir
 	}
