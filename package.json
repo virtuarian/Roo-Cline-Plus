@@ -4,7 +4,7 @@
 	"description": "A powerful AI coding assistant with Claude 3 support. Enhanced fork of Roo Cline.",
 	"publisher": "virtuarian",
 	"version": "2.0.0",
-	"icon": "assets/icons/rocket.png",
+	"icon": "assets/icons/dog.png",
 	"galleryBanner": {
 		"color": "#617A91",
 		"theme": "dark"
@@ -53,7 +53,7 @@
 				{
 					"id": "roo-cline-plus-ActivityBar",
 					"title": "Roo Cline Plus",
-					"icon": "$(rocket)"
+					"icon": "$(symbol-class)"
 				}
 			]
 		},
@@ -238,6 +238,7 @@
 		"@types/vscode": "^1.95.0",
 		"@vscode/codicons": "^0.0.36",
 		"axios": "^1.7.4",
+		"canvas": "^2.11.2",
 		"cheerio": "^1.0.0",
 		"chokidar": "^4.0.1",
 		"clone-deep": "^4.0.1",

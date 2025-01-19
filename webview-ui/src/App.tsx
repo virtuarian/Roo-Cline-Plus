@@ -6,6 +6,7 @@ import HistoryView from "./components/history/HistoryView"
 import SettingsView from "./components/settings/SettingsView"
 import WelcomeView from "./components/welcome/WelcomeView"
 import { ExtensionStateContextProvider, useExtensionState } from "./context/ExtensionStateContext"
+import { LanguageProvider } from "./context/LanguageContext"
 import { vscode } from "./utils/vscode"
 import McpView from "./components/mcp/McpView"
 import PromptsView from "./components/prompts/PromptsView"
@@ -104,7 +105,9 @@ const AppContent = () => {
 const App = () => {
 	return (
 		<ExtensionStateContextProvider>
-			<AppContent />
+			<LanguageProvider>
+				<AppContent />
+			</LanguageProvider>
 		</ExtensionStateContextProvider>
 	)
 }
