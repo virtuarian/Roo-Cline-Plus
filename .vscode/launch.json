@@ -10,9 +10,7 @@
 			"type": "extensionHost",
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
-			"args": [
-				"--extensionDevelopmentPath=${workspaceFolder}",
-			],
+			"args": ["--extensionDevelopmentPath=${workspaceFolder}"],
 			"sourceMaps": true,
 			"outFiles": ["${workspaceFolder}/dist/**/*.js"],
 			"preLaunchTask": "compile",
@@ -20,10 +18,33 @@
 				"NODE_ENV": "development",
 				"VSCODE_DEBUG_MODE": "true"
 			},
-			"resolveSourceMapLocations": [
-				"${workspaceFolder}/**",
-				"!**/node_modules/**"
-			]
+			"resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"]
 		},
+		{
+			"name": "Debug Jest Tests",
+			"type": "node",
+			"request": "launch",
+			"runtimeExecutable": "npm",
+			"runtimeArgs": ["run", "test", "--", "--runInBand", "--watchAll=false"],
+			"port": 9229,
+			"console": "integratedTerminal",
+			"internalConsoleOptions": "neverOpen",
+			"sourceMaps": true,
+			"outFiles": ["${workspaceFolder}/dist/**/*.js"],
+			"preLaunchTask": "compile"
+		},
+		{
+			"name": "Debug VSCode Extension Tests",
+			"type": "extensionHost",
+			"request": "launch",
+			"runtimeExecutable": "${execPath}",
+			"args": [
+				"--extensionDevelopmentPath=${workspaceFolder}",
+				"--extensionTestsPath=${workspaceFolder}/out/test"
+			],
+			"sourceMaps": true,
+			"outFiles": ["${workspaceFolder}/out/**/*.js"],
+			"preLaunchTask": "compile-tests"
+		}
 	]
 }

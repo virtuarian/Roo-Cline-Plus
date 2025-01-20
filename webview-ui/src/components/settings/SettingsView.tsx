@@ -5,15 +5,21 @@ import {
 	VSCodeTextArea,
 	VSCodeTextField,
 } from "@vscode/webview-ui-toolkit/react"
+import { Dropdown } from "vscrui"
+import type { DropdownOption } from "vscrui"
 import { memo, useEffect, useState } from "react"
 import { useExtensionState } from "../../context/ExtensionStateContext"
+import { useLanguage } from "../../context/LanguageContext"
 import { validateApiConfiguration, validateModelId } from "../../utils/validate"
 import { vscode } from "../../utils/vscode"
 import ApiOptions from "./ApiOptions"
 import McpEnabledToggle from "../mcp/McpEnabledToggle"
 import ApiConfigManager from "./ApiConfigManager"
 import { Mode } from "../../../../src/shared/modes"
-
+import OpenRouterModelPicker, {
+	ModelDescriptionMarkdown,
+	OPENROUTER_MODEL_PICKER_Z_INDEX,
+} from "./OpenRouterModelPicker"
 const IS_DEV = false // FIXME: use flags when packaging
 
 type SettingsViewProps = {
@@ -21,6 +27,7 @@ type SettingsViewProps = {
 }
 
 const SettingsView = ({ onDone }: SettingsViewProps) => {
+	const { language, setLanguage, t } = useLanguage()
 	const {
 		apiConfiguration,
 		version,
@@ -119,7 +126,7 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 	useEffect(() => {
 		setApiErrorMessage(undefined)
 		setModelIdErrorMessage(undefined)
-	}, [apiConfiguration])
+	}, [apiConfiguration, language])
 
 	// Initial validation on mount
 	useEffect(() => {
@@ -167,14 +174,14 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 					marginBottom: "17px",
 					paddingRight: 17,
 				}}>
-				<h3 style={{ color: "var(--vscode-foreground)", margin: 0 }}>Settings</h3>
-				<VSCodeButton onClick={handleSubmit}>Done</VSCodeButton>
+				<h3 style={{ color: "var(--vscode-foreground)", margin: 0 }}>{t("settings.title")}</h3>
+				<VSCodeButton onClick={handleSubmit}>{t("settings.done")}</VSCodeButton>
 			</div>
 			<div
 				style={{ flexGrow: 1, overflowY: "scroll", paddingRight: 8, display: "flex", flexDirection: "column" }}>
 				<div style={{ marginBottom: 5 }}>
 					<h3 style={{ color: "var(--vscode-foreground)", margin: 0, marginBottom: 15 }}>
-						Provider Settings
+						{t("settings.providerSettings")}
 					</h3>
 					<ApiConfigManager
 						currentApiConfigName={currentApiConfigName}
@@ -212,11 +219,13 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 				<div style={{ marginBottom: 5 }}>
 					<div style={{ marginBottom: 15 }}>
 						<h3 style={{ color: "var(--vscode-foreground)", margin: 0, marginBottom: 15 }}>
-							Agent Settings
+							{t("settings.agentSettings")}
 						</h3>
 
 						<div style={{ marginBottom: 15 }}>
-							<label style={{ fontWeight: "500", display: "block", marginBottom: 5 }}>Agent Mode</label>
+							<label style={{ fontWeight: "500", display: "block", marginBottom: 5 }}>
+								{t("settings.agentMode")}
+							</label>
 							<select
 								value={mode}
 								onChange={(e) => {
@@ -233,9 +242,9 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 									borderRadius: "2px",
 									height: "28px",
 								}}>
-								<option value="code">Code</option>
-								<option value="architect">Architect</option>
-								<option value="ask">Ask</option>
+								<option value="code">{t("settings.codeMode")}</option>
+								<option value="architect">{t("settings.architectMode")}</option>
+								<option value="ask">{t("settings.askMode")}</option>
 							</select>
 							<p
 								style={{
@@ -243,14 +252,12 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 									marginTop: "5px",
 									color: "var(--vscode-descriptionForeground)",
 								}}>
-								Select the mode that best fits your needs. Code mode focuses on implementation details,
-								Architect mode on high-level design, and Ask mode on asking questions about the
-								codebase.
+								{t("settings.modeDescription")}
 							</p>
 						</div>
 
 						<label style={{ fontWeight: "500", display: "block", marginBottom: 5 }}>
-							Preferred Language
+							{t("settings.preferredLanguage")}
 						</label>
 						<select
 							value={preferredLanguage}
@@ -263,6 +270,8 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 								border: "1px solid var(--vscode-input-border)",
 								borderRadius: "2px",
 								height: "28px",
+								zIndex: 100,
+								position: "relative",
 							}}>
 							<option value="English">English</option>
 							<option value="Arabic">Arabic - العربية</option>
@@ -289,19 +298,17 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 								marginTop: "5px",
 								color: "var(--vscode-descriptionForeground)",
 							}}>
-							Select the language that Cline should use for communication.
+							{t("settings.languageDescription")}
 						</p>
 					</div>
 
 					<div style={{ marginBottom: 15 }}>
-						<span style={{ fontWeight: "500" }}>Custom Instructions</span>
+						<span style={{ fontWeight: "500" }}>{t("settings.customInstructions")}</span>
 						<VSCodeTextArea
 							value={customInstructions ?? ""}
 							style={{ width: "100%" }}
 							rows={4}
-							placeholder={
-								'e.g. "Run unit tests at the end", "Use TypeScript with async/await", "Speak in Spanish"'
-							}
+							placeholder={t("settings.customInstructionsPlaceholder")}
 							onInput={(e: any) => setCustomInstructions(e.target?.value ?? "")}
 						/>
 						<p
@@ -310,11 +317,9 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 								marginTop: "5px",
 								color: "var(--vscode-descriptionForeground)",
 							}}>
-							These instructions are added to the end of the system prompt sent with every request. Custom
-							instructions set in .clinerules in the working directory are also included. For
-							mode-specific instructions, use the{" "}
-							<span className="codicon codicon-notebook" style={{ fontSize: "10px" }}></span> Prompts tab
-							in the top menu.
+							{t("settings.customInstructionsDescription")}{" "}
+							<span className="codicon codicon-notebook" style={{ fontSize: "10px" }}></span>{" "}
+							{t("settings.customInstructionsPromptsNote")}
 						</p>
 					</div>
 
@@ -323,7 +328,9 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 
 				<div style={{ marginBottom: 5 }}>
 					<div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-						<span style={{ fontWeight: "500", minWidth: "150px" }}>Terminal output limit</span>
+						<span style={{ fontWeight: "500", minWidth: "150px" }}>
+							{t("settings.terminalOutputLimit")}
+						</span>
 						<input
 							type="range"
 							min="100"
@@ -340,8 +347,7 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 						<span style={{ minWidth: "45px", textAlign: "left" }}>{terminalOutputLineLimit ?? 500}</span>
 					</div>
 					<p style={{ fontSize: "12px", marginTop: "5px", color: "var(--vscode-descriptionForeground)" }}>
-						Maximum number of lines to include in terminal output when executing commands. When exceeded
-						lines will be removed from the middle, saving tokens.
+						{t("settings.terminalOutputLimitDescription")}
 					</p>
 				</div>
 
@@ -355,7 +361,7 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 								setExperimentalDiffStrategy(false)
 							}
 						}}>
-						<span style={{ fontWeight: "500" }}>Enable editing through diffs</span>
+						<span style={{ fontWeight: "500" }}>{t("settings.enableDiffs")}</span>
 					</VSCodeCheckbox>
 					<p
 						style={{
@@ -363,8 +369,7 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 							marginTop: "5px",
 							color: "var(--vscode-descriptionForeground)",
 						}}>
-						When enabled, Cline will be able to edit files more quickly and will automatically reject
-						truncated full-file writes. Works best with the latest Claude 3.5 Sonnet model.
+						{t("settings.diffDescription")}
 					</p>
 
 					{diffEnabled && (
@@ -374,7 +379,7 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 								<VSCodeCheckbox
 									checked={experimentalDiffStrategy}
 									onChange={(e: any) => setExperimentalDiffStrategy(e.target.checked)}>
-									<span style={{ fontWeight: "500" }}>Use experimental unified diff strategy</span>
+									<span style={{ fontWeight: "500" }}>{t("settings.experimentalDiffStrategy")}</span>
 								</VSCodeCheckbox>
 							</div>
 							<p
@@ -383,13 +388,13 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 									marginBottom: 15,
 									color: "var(--vscode-descriptionForeground)",
 								}}>
-								Enable the experimental unified diff strategy. This strategy might reduce the number of
-								retries caused by model errors but may cause unexpected behavior or incorrect edits.
-								Only enable if you understand the risks and are willing to carefully review all changes.
+								{t("settings.experimentalDiffStrategyDescription")}
 							</p>
 
 							<div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-								<span style={{ fontWeight: "500", minWidth: "100px" }}>Match precision</span>
+								<span style={{ fontWeight: "500", minWidth: "100px" }}>
+									{t("settings.matchPrecision")}
+								</span>
 								<input
 									type="range"
 									min="0.8"
@@ -415,9 +420,7 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 									marginTop: "5px",
 									color: "var(--vscode-descriptionForeground)",
 								}}>
-								This slider controls how precisely code sections must match when applying diffs. Lower
-								values allow more flexible matching but increase the risk of incorrect replacements. Use
-								values below 100% with extreme caution.
+								{t("settings.matchPrecisionDescription")}
 							</p>
 						</div>
 					)}
@@ -427,7 +430,7 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 					<VSCodeCheckbox
 						checked={alwaysAllowReadOnly}
 						onChange={(e: any) => setAlwaysAllowReadOnly(e.target.checked)}>
-						<span style={{ fontWeight: "500" }}>Always approve read-only operations</span>
+						<span style={{ fontWeight: "500" }}>{t("settings.alwaysApproveReadOnly")}</span>
 					</VSCodeCheckbox>
 					<p
 						style={{
@@ -435,8 +438,7 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 							marginTop: "5px",
 							color: "var(--vscode-descriptionForeground)",
 						}}>
-						When enabled, Cline will automatically view directory contents and read files without requiring
-						you to click the Approve button.
+						{t("settings.alwaysApproveReadOnlyDescription")}
 					</p>
 				</div>
 
@@ -448,22 +450,20 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 						padding: "10px",
 					}}>
 					<h4 style={{ fontWeight: 500, margin: "0 0 10px 0", color: "var(--vscode-errorForeground)" }}>
-						⚠️ High-Risk Auto-Approve Settings
+						⚠️ {t("settings.highRiskSettings")}
 					</h4>
 					<p style={{ fontSize: "12px", marginBottom: 15, color: "var(--vscode-descriptionForeground)" }}>
-						The following settings allow Cline to automatically perform potentially dangerous operations
-						without requiring approval. Enable these settings only if you fully trust the AI and understand
-						the associated security risks.
+						{t("settings.highRiskSettingsDescription")}
 					</p>
 
 					<div style={{ marginBottom: 5 }}>
 						<VSCodeCheckbox
 							checked={alwaysAllowWrite}
 							onChange={(e: any) => setAlwaysAllowWrite(e.target.checked)}>
-							<span style={{ fontWeight: "500" }}>Always approve write operations</span>
+							<span style={{ fontWeight: "500" }}>{t("settings.alwaysApproveWrite")}</span>
 						</VSCodeCheckbox>
 						<p style={{ fontSize: "12px", marginTop: "5px", color: "var(--vscode-descriptionForeground)" }}>
-							Automatically create and edit files without requiring approval
+							{t("settings.alwaysApproveWriteDescription")}
 						</p>
 						{alwaysAllowWrite && (
 							<div style={{ marginTop: 10 }}>
@@ -489,7 +489,7 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 										marginTop: "5px",
 										color: "var(--vscode-descriptionForeground)",
 									}}>
-									Delay after writes to allow diagnostics to detect potential problems
+									{t("settings.writeDelayDescription")}
 								</p>
 							</div>
 						)}
@@ -499,12 +499,12 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 						<VSCodeCheckbox
 							checked={alwaysAllowBrowser}
 							onChange={(e: any) => setAlwaysAllowBrowser(e.target.checked)}>
-							<span style={{ fontWeight: "500" }}>Always approve browser actions</span>
+							<span style={{ fontWeight: "500" }}>{t("settings.alwaysApproveBrowser")}</span>
 						</VSCodeCheckbox>
 						<p style={{ fontSize: "12px", marginTop: "5px", color: "var(--vscode-descriptionForeground)" }}>
-							Automatically perform browser actions without requiring approval
+							{t("settings.alwaysApproveBrowserDescription")}
 							<br />
-							Note: Only applies when the model supports computer use
+							{t("settings.browserSupportNote")}
 						</p>
 					</div>
 
@@ -512,10 +512,10 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 						<VSCodeCheckbox
 							checked={alwaysApproveResubmit}
 							onChange={(e: any) => setAlwaysApproveResubmit(e.target.checked)}>
-							<span style={{ fontWeight: "500" }}>Always retry failed API requests</span>
+							<span style={{ fontWeight: "500" }}>{t("settings.alwaysApproveResubmit")}</span>
 						</VSCodeCheckbox>
 						<p style={{ fontSize: "12px", marginTop: "5px", color: "var(--vscode-descriptionForeground)" }}>
-							Automatically retry failed API requests when server returns an error response
+							{t("settings.alwaysApproveResubmitDescription")}
 						</p>
 						{alwaysApproveResubmit && (
 							<div style={{ marginTop: 10 }}>
@@ -541,7 +541,7 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 										marginTop: "5px",
 										color: "var(--vscode-descriptionForeground)",
 									}}>
-									Delay before retrying the request
+									{t("settings.requestDelayDescription")}
 								</p>
 							</div>
 						)}
@@ -551,11 +551,10 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 						<VSCodeCheckbox
 							checked={alwaysAllowMcp}
 							onChange={(e: any) => setAlwaysAllowMcp(e.target.checked)}>
-							<span style={{ fontWeight: "500" }}>Always approve MCP tools</span>
+							<span style={{ fontWeight: "500" }}>{t("settings.alwaysApproveMcp")}</span>
 						</VSCodeCheckbox>
 						<p style={{ fontSize: "12px", marginTop: "5px", color: "var(--vscode-descriptionForeground)" }}>
-							Enable auto-approval of individual MCP tools in the MCP Servers view (requires both this
-							setting and the tool's individual "Always allow" checkbox)
+							{t("settings.alwaysApproveMcpDescription")}
 						</p>
 					</div>
 
@@ -563,23 +562,22 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 						<VSCodeCheckbox
 							checked={alwaysAllowExecute}
 							onChange={(e: any) => setAlwaysAllowExecute(e.target.checked)}>
-							<span style={{ fontWeight: "500" }}>Always approve allowed execute operations</span>
+							<span style={{ fontWeight: "500" }}>{t("settings.alwaysApproveExecute")}</span>
 						</VSCodeCheckbox>
 						<p style={{ fontSize: "12px", marginTop: "5px", color: "var(--vscode-descriptionForeground)" }}>
-							Automatically execute allowed terminal commands without requiring approval
+							{t("settings.alwaysApproveExecuteDescription")}
 						</p>
 
 						{alwaysAllowExecute && (
 							<div style={{ marginTop: 10 }}>
-								<span style={{ fontWeight: "500" }}>Allowed Auto-Execute Commands</span>
+								<span style={{ fontWeight: "500" }}>{t("settings.allowedAutoExecuteCommands")}</span>
 								<p
 									style={{
 										fontSize: "12px",
 										marginTop: "5px",
 										color: "var(--vscode-descriptionForeground)",
 									}}>
-									Command prefixes that can be auto-executed when "Always approve execute operations"
-									is enabled.
+									{t("settings.allowedAutoExecuteCommandsDescription")}
 								</p>
 
 								<div style={{ display: "flex", gap: "5px", marginTop: "10px" }}>
@@ -592,10 +590,10 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 												handleAddCommand()
 											}
 										}}
-										placeholder="Enter command prefix (e.g., 'git ')"
+										placeholder={t("settings.commandPrefixPlaceholder")}
 										style={{ flexGrow: 1 }}
 									/>
-									<VSCodeButton onClick={handleAddCommand}>Add</VSCodeButton>
+									<VSCodeButton onClick={handleAddCommand}>{t("settings.add")}</VSCodeButton>
 								</div>
 
 								<div
@@ -656,10 +654,10 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 					<div style={{ marginBottom: 10 }}>
 						<div style={{ marginBottom: 15 }}>
 							<h3 style={{ color: "var(--vscode-foreground)", margin: 0, marginBottom: 15 }}>
-								Browser Settings
+								{t("settings.browserSettings")}
 							</h3>
 							<label style={{ fontWeight: "500", display: "block", marginBottom: 5 }}>
-								Viewport size
+								{t("settings.viewportSize")}
 							</label>
 							<select
 								value={browserViewportSize}
@@ -673,10 +671,10 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 									borderRadius: "2px",
 									height: "28px",
 								}}>
-								<option value="1280x800">Large Desktop (1280x800)</option>
-								<option value="900x600">Small Desktop (900x600)</option>
-								<option value="768x1024">Tablet (768x1024)</option>
-								<option value="360x640">Mobile (360x640)</option>
+								<option value="1280x800">{t("settings.largeDesktop")} (1280x800)</option>
+								<option value="900x600">{t("settings.smallDesktop")} (900x600)</option>
+								<option value="768x1024">{t("settings.tablet")} (768x1024)</option>
+								<option value="360x640">{t("settings.mobile")} (360x640)</option>
 							</select>
 							<p
 								style={{
@@ -684,14 +682,15 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 									marginTop: "5px",
 									color: "var(--vscode-descriptionForeground)",
 								}}>
-								Select the viewport size for browser interactions. This affects how websites are
-								displayed and interacted with.
+								{t("settings.viewportSizeDescription")}
 							</p>
 						</div>
 
 						<div style={{ marginBottom: 15 }}>
 							<div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-								<span style={{ fontWeight: "500", minWidth: "100px" }}>Screenshot quality</span>
+								<span style={{ fontWeight: "500", minWidth: "100px" }}>
+									{t("settings.screenshotQuality")}
+								</span>
 								<input
 									type="range"
 									min="1"
@@ -713,8 +712,7 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 									marginTop: "5px",
 									color: "var(--vscode-descriptionForeground)",
 								}}>
-								Adjust the WebP quality of browser screenshots. Higher values provide clearer
-								screenshots but increase token usage.
+								{t("settings.screenshotQualityDescription")}
 							</p>
 						</div>
 					</div>
@@ -722,12 +720,12 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 					<div style={{ marginBottom: 5 }}>
 						<div style={{ marginBottom: 10 }}>
 							<h3 style={{ color: "var(--vscode-foreground)", margin: 0, marginBottom: 15 }}>
-								Notification Settings
+								{t("settings.notificationSettings")}
 							</h3>
 							<VSCodeCheckbox
 								checked={soundEnabled}
 								onChange={(e: any) => setSoundEnabled(e.target.checked)}>
-								<span style={{ fontWeight: "500" }}>Enable sound effects</span>
+								<span style={{ fontWeight: "500" }}>{t("settings.enableSoundEffects")}</span>
 							</VSCodeCheckbox>
 							<p
 								style={{
@@ -735,13 +733,13 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 									marginTop: "5px",
 									color: "var(--vscode-descriptionForeground)",
 								}}>
-								When enabled, Cline will play sound effects for notifications and events.
+								{t("settings.soundEffectsDescription")}
 							</p>
 						</div>
 						{soundEnabled && (
 							<div style={{ marginLeft: 0 }}>
 								<div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-									<span style={{ fontWeight: "500", minWidth: "100px" }}>Volume</span>
+									<span style={{ fontWeight: "500", minWidth: "100px" }}>{t("settings.volume")}</span>
 									<input
 										type="range"
 										min="0"
@@ -767,9 +765,9 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 
 				{IS_DEV && (
 					<>
-						<div style={{ marginTop: "10px", marginBottom: "4px" }}>Debug</div>
+						<div style={{ marginTop: "10px", marginBottom: "4px" }}>{t("settings.debug")}</div>
 						<VSCodeButton onClick={handleResetState} style={{ marginTop: "5px", width: "auto" }}>
-							Reset State
+							{t("settings.resetState")}
 						</VSCodeButton>
 						<p
 							style={{
@@ -777,7 +775,7 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 								marginTop: "5px",
 								color: "var(--vscode-descriptionForeground)",
 							}}>
-							This will reset all global state and secret storage in the extension.
+							{t("settings.resetStateDescription")}
 						</p>
 					</>
 				)}
@@ -792,16 +790,15 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 						padding: "10px 8px 15px 0px",
 					}}>
 					<p style={{ wordWrap: "break-word", margin: 0, padding: 0 }}>
-						If you have any questions or feedback, feel free to open an issue at{" "}
-						<VSCodeLink href="https://github.com/RooVetGit/Roo-Cline" style={{ display: "inline" }}>
-							github.com/RooVetGit/Roo-Cline
+						{t("settings.feedbackIntro")}{" "}
+						<VSCodeLink href="https://github.com/virtuarian/Roo-Cline-Plus" style={{ display: "inline" }}>
+							github.com/virtuarian/Roo-Cline-Plus
 						</VSCodeLink>{" "}
-						or join{" "}
-						<VSCodeLink href="https://www.reddit.com/r/roocline/" style={{ display: "inline" }}>
-							reddit.com/r/roocline
-						</VSCodeLink>
 					</p>
-					<p style={{ fontStyle: "italic", margin: "10px 0 0 0", padding: 0 }}>v{version}</p>
+					<p style={{ fontStyle: "italic", margin: "10px 0 0 0", padding: 0 }}>
+						{t("settings.version")}
+						{version}
+					</p>
 				</div>
 			</div>
 		</div>
