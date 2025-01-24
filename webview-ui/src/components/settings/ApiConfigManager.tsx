@@ -1,6 +1,7 @@
 import { VSCodeButton, VSCodeTextField } from "@vscode/webview-ui-toolkit/react"
 import { memo, useEffect, useRef, useState } from "react"
 import { ApiConfigMeta } from "../../../../src/shared/ExtensionMessage"
+import { useLanguage } from "../../context/LanguageContext"
 
 interface ApiConfigManagerProps {
 	currentApiConfigName?: string
@@ -19,6 +20,7 @@ const ApiConfigManager = ({
 	onRenameConfig,
 	onUpsertConfig,
 }: ApiConfigManagerProps) => {
+	const { language, setLanguage, t } = useLanguage()
 	const [editState, setEditState] = useState<"new" | "rename" | null>(null)
 	const [inputValue, setInputValue] = useState("")
 	const inputRef = useRef<HTMLInputElement>()
@@ -206,7 +208,7 @@ const ApiConfigManager = ({
 								margin: "5px 0 12px",
 								color: "var(--vscode-descriptionForeground)",
 							}}>
-							Save different API configurations to quickly switch between providers and settings
+							{t("settings.profileDescription")}
 						</p>
 					</>
 				)}

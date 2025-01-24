@@ -36,7 +36,7 @@ Roo Cline+は、VSCode Language Model APIの統合と追加機能を備えた、
 2. ファイルの作成・編集、コマンド実行を承認
 3. 結果を確認し、必要に応じてフィードバック
 
-## Claude 3の設定
+## VSCode - Claude 3の設定
 
 1. VSCodeでGitHub Copilot ChatとGitHub Copilotをインストール
 2. Roo Cline+の設定でAPI Providerから「VS Code LM API」を選択

@@ -9,6 +9,7 @@ import { ExtensionStateContextProvider, useExtensionState } from "./context/Exte
 import { vscode } from "./utils/vscode"
 import McpView from "./components/mcp/McpView"
 import PromptsView from "./components/prompts/PromptsView"
+import { LanguageProvider } from "./context/LanguageContext"
 
 const AppContent = () => {
 	const { didHydrateState, showWelcome, shouldShowAnnouncement } = useExtensionState()
@@ -103,9 +104,11 @@ const AppContent = () => {
 
 const App = () => {
 	return (
-		<ExtensionStateContextProvider>
-			<AppContent />
-		</ExtensionStateContextProvider>
+		<LanguageProvider>
+			<ExtensionStateContextProvider>
+				<AppContent />
+			</ExtensionStateContextProvider>
+		</LanguageProvider>
 	)
 }
 

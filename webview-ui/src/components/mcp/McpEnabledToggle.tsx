@@ -2,10 +2,10 @@ import { VSCodeCheckbox } from "@vscode/webview-ui-toolkit/react"
 import { FormEvent } from "react"
 import { useExtensionState } from "../../context/ExtensionStateContext"
 import { vscode } from "../../utils/vscode"
-
+import { useLanguage } from "../../context/LanguageContext"
 const McpEnabledToggle = () => {
 	const { mcpEnabled, setMcpEnabled } = useExtensionState()
-
+	const { language, setLanguage, t } = useLanguage()
 	const handleChange = (e: Event | FormEvent<HTMLElement>) => {
 		const target = ("target" in e ? e.target : null) as HTMLInputElement | null
 		if (!target) return
@@ -24,8 +24,9 @@ const McpEnabledToggle = () => {
 					marginTop: "5px",
 					color: "var(--vscode-descriptionForeground)",
 				}}>
-				When enabled, Cline will be able to interact with MCP servers for advanced functionality. If you're not
-				using MCP, you can disable this to reduce Cline's token usage.
+				{t("settings.mcpEnabledDescription")}
+				{/* When enabled, Cline will be able to interact with MCP servers for advanced functionality. If you're not
+				using MCP, you can disable this to reduce Cline's token usage. */}
 			</p>
 		</div>
 	)

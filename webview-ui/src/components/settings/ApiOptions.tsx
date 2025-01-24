@@ -29,6 +29,7 @@ import {
 } from "../../../../src/shared/api"
 import { ExtensionMessage } from "../../../../src/shared/ExtensionMessage"
 import { useExtensionState } from "../../context/ExtensionStateContext"
+import { useLanguage } from "../../context/LanguageContext"
 import { vscode } from "../../utils/vscode"
 import * as vscodemodels from "vscode"
 import VSCodeButtonLink from "../common/VSCodeButtonLink"
@@ -46,6 +47,7 @@ interface ApiOptionsProps {
 
 const ApiOptions = ({ apiErrorMessage, modelIdErrorMessage }: ApiOptionsProps) => {
 	const { apiConfiguration, setApiConfiguration, uriScheme, onUpdateApiConfig } = useExtensionState()
+	const { language, setLanguage, t } = useLanguage()
 	const [ollamaModels, setOllamaModels] = useState<string[]>([])
 	const [lmStudioModels, setLmStudioModels] = useState<string[]>([])
 	const [vsCodeLmModels, setVsCodeLmModels] = useState<vscodemodels.LanguageModelChatSelector[]>([])
@@ -124,8 +126,26 @@ const ApiOptions = ({ apiErrorMessage, modelIdErrorMessage }: ApiOptionsProps) =
 	return (
 		<div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
 			<div className="dropdown-container">
+				<label htmlFor="language-selector">
+					<span style={{ fontWeight: 500 }}>{t("settings.language")}</span>
+				</label>
+				<Dropdown
+					id="language-selector"
+					value={language}
+					onChange={(value: unknown) => {
+						setLanguage((value as DropdownOption).value as "en" | "ja")
+					}}
+					style={{ minWidth: 130, position: "relative", zIndex: OPENROUTER_MODEL_PICKER_Z_INDEX + 4 }}
+					options={[
+						{ value: "en", label: "English" },
+						{ value: "ja", label: "日本語" },
+					]}
+				/>
+			</div>
+
+			<div className="dropdown-container">
 				<label htmlFor="api-provider">
-					<span style={{ fontWeight: 500 }}>API Provider</span>
+					<span style={{ fontWeight: 500 }}>{t("settings.apiProvider")}</span>
 				</label>
 				<Dropdown
 					id="api-provider"
@@ -137,7 +157,22 @@ const ApiOptions = ({ apiErrorMessage, modelIdErrorMessage }: ApiOptionsProps) =
 							},
 						})
 					}}
-					style={{ minWidth: 130, position: "relative", zIndex: OPENROUTER_MODEL_PICKER_Z_INDEX + 1 }}
+					style={{ minWidth: 130, position: "relative", zIndex: OPENROUTER_MODEL_PICKER_Z_INDEX + 2 }}
+					// options={[
+					// { value: "openrouter", label: t("settings.providers.openrouter") },
+					// { value: "anthropic", label: t("settings.providers.anthropic") },
+					// { value: "gemini", label: t("settings.providers.gemini") },
+					// { value: "deepseek", label: t("settings.providers.deepseek") },
+					// { value: "openai-native", label: t("settings.providers.openaiNative") },
+					// { value: "openai", label: t("settings.providers.openaiCompatible") },
+					// { value: "vertex", label: t("settings.providers.vertex") },
+					// { value: "bedrock", label: t("settings.providers.bedrock") },
+					// { value: "glama", label: t("settings.providers.glama") },
+					// { value: "vscode-lm", label: t("settings.providers.vscodeLm") },
+					// { value: "mistral", label: t("settings.providers.mistral") },
+					// { value: "lmstudio", label: t("settings.providers.lmstudio") },
+					// { value: "ollama", label: t("settings.providers.ollama") },
+					// ]}
 					options={[
 						{ value: "openrouter", label: "OpenRouter" },
 						{ value: "anthropic", label: "Anthropic" },
@@ -163,8 +198,8 @@ const ApiOptions = ({ apiErrorMessage, modelIdErrorMessage }: ApiOptionsProps) =
 						style={{ width: "100%" }}
 						type="password"
 						onInput={handleInputChange("apiKey")}
-						placeholder="Enter API Key...">
-						<span style={{ fontWeight: 500 }}>Anthropic API Key</span>
+						placeholder={t("settings.enterApiKey")}>
+						<span style={{ fontWeight: 500 }}>{t("settings.anthropicApiKey")}</span>
 					</VSCodeTextField>
 
 					<Checkbox
@@ -175,7 +210,7 @@ const ApiOptions = ({ apiErrorMessage, modelIdErrorMessage }: ApiOptionsProps) =
 								setApiConfiguration({ ...apiConfiguration, anthropicBaseUrl: "" })
 							}
 						}}>
-						Use custom base URL
+						{t("settings.useCustomBaseUrl")}
 					</Checkbox>
 
 					{anthropicBaseUrlSelected && (
@@ -184,7 +219,7 @@ const ApiOptions = ({ apiErrorMessage, modelIdErrorMessage }: ApiOptionsProps) =
 							style={{ width: "100%", marginTop: 3 }}
 							type="url"
 							onInput={handleInputChange("anthropicBaseUrl")}
-							placeholder="Default: https://api.anthropic.com"
+							placeholder={t("settings.defaultAnthropicUrl")}
 						/>
 					)}
 
@@ -194,7 +229,7 @@ const ApiOptions = ({ apiErrorMessage, modelIdErrorMessage }: ApiOptionsProps) =
 							marginTop: 3,
 							color: "var(--vscode-descriptionForeground)",
 						}}>
-						This key is stored locally and only used to make API requests from this extension.
+						{t("settings.keyStorageNotice")}
 						{!apiConfiguration?.apiKey && (
 							<VSCodeLink
 								href="https://console.anthropic.com/settings/keys"
@@ -213,15 +248,15 @@ const ApiOptions = ({ apiErrorMessage, modelIdErrorMessage }: ApiOptionsProps) =
 						style={{ width: "100%" }}
 						type="password"
 						onInput={handleInputChange("glamaApiKey")}
-						placeholder="Enter API Key...">
-						<span style={{ fontWeight: 500 }}>Glama API Key</span>
+						placeholder={t("settings.enterApiKey")}>
+						<span style={{ fontWeight: 500 }}>{t("settings.glamaApiKey")}</span>
 					</VSCodeTextField>
 					{!apiConfiguration?.glamaApiKey && (
 						<VSCodeButtonLink
 							href={getGlamaAuthUrl(uriScheme)}
 							style={{ margin: "5px 0 0 0" }}
 							appearance="secondary">
-							Get Glama API Key
+							{t("settings.getGlamaApiKey")}
 						</VSCodeButtonLink>
 					)}
 					<p
@@ -230,7 +265,7 @@ const ApiOptions = ({ apiErrorMessage, modelIdErrorMessage }: ApiOptionsProps) =
 							marginTop: "5px",
 							color: "var(--vscode-descriptionForeground)",
 						}}>
-						This key is stored locally and only used to make API requests from this extension.
+						{t("settings.keyStorageNotice")}
 					</p>
 				</div>
 			)}
@@ -270,8 +305,8 @@ const ApiOptions = ({ apiErrorMessage, modelIdErrorMessage }: ApiOptionsProps) =
 						style={{ width: "100%" }}
 						type="password"
 						onInput={handleInputChange("mistralApiKey")}
-						placeholder="Enter API Key...">
-						<span style={{ fontWeight: 500 }}>Mistral API Key</span>
+						placeholder={t("settings.enterApiKey")}>
+						<span style={{ fontWeight: 500 }}>{t("settings.mistralApiKey")}</span>
 					</VSCodeTextField>
 					<p
 						style={{
@@ -279,7 +314,7 @@ const ApiOptions = ({ apiErrorMessage, modelIdErrorMessage }: ApiOptionsProps) =
 							marginTop: 3,
 							color: "var(--vscode-descriptionForeground)",
 						}}>
-						This key is stored locally and only used to make API requests from this extension.
+						{t("settings.keyStorageNotice")}
 						{!apiConfiguration?.mistralApiKey && (
 							<VSCodeLink
 								href="https://console.mistral.ai/codestral/"
@@ -287,7 +322,7 @@ const ApiOptions = ({ apiErrorMessage, modelIdErrorMessage }: ApiOptionsProps) =
 									display: "inline",
 									fontSize: "inherit",
 								}}>
-								You can get a Mistral API key by signing up here.
+								{t("settings.getMistralApiKey")}
 							</VSCodeLink>
 						)}
 					</p>
@@ -301,15 +336,15 @@ const ApiOptions = ({ apiErrorMessage, modelIdErrorMessage }: ApiOptionsProps) =
 						style={{ width: "100%" }}
 						type="password"
 						onInput={handleInputChange("openRouterApiKey")}
-						placeholder="Enter API Key...">
-						<span style={{ fontWeight: 500 }}>OpenRouter API Key</span>
+						placeholder={t("settings.enterApiKey")}>
+						<span style={{ fontWeight: 500 }}>{t("settings.openRouterApiKey")}</span>
 					</VSCodeTextField>
 					{!apiConfiguration?.openRouterApiKey && (
 						<VSCodeButtonLink
 							href={getOpenRouterAuthUrl(uriScheme)}
 							style={{ margin: "5px 0 0 0" }}
 							appearance="secondary">
-							Get OpenRouter API Key
+							{t("settings.getOpenRouterApiKey")}
 						</VSCodeButtonLink>
 					)}
 					<p
@@ -318,7 +353,7 @@ const ApiOptions = ({ apiErrorMessage, modelIdErrorMessage }: ApiOptionsProps) =
 							marginTop: "5px",
 							color: "var(--vscode-descriptionForeground)",
 						}}>
-						This key is stored locally and only used to make API requests from this extension.{" "}
+						{t("settings.keyStorageNotice")}
 						{/* {!apiConfiguration?.openRouterApiKey && (
 							<span style={{ color: "var(--vscode-charts-green)" }}>
 								(<span style={{ fontWeight: 500 }}>Note:</span> OpenRouter is recommended for high rate
@@ -722,8 +757,7 @@ const ApiOptions = ({ apiErrorMessage, modelIdErrorMessage }: ApiOptionsProps) =
 								color: "var(--vscode-errorForeground)",
 								fontWeight: 500,
 							}}>
-							Note: This is a very experimental integration and may not work as expected. Please report
-							any issues to the Roo-Cline GitHub repository.
+							{t("settings.experimentalNote")}
 						</p>
 					</div>
 				</div>
@@ -880,6 +914,7 @@ export const ModelInfoView = ({
 	isDescriptionExpanded: boolean
 	setIsDescriptionExpanded: (isExpanded: boolean) => void
 }) => {
+	const { t } = useLanguage()
 	const isGemini = Object.keys(geminiModels).includes(selectedModelId)
 
 	const infoItems = [
@@ -894,57 +929,61 @@ export const ModelInfoView = ({
 		<ModelInfoSupportsItem
 			key="supportsImages"
 			isSupported={modelInfo.supportsImages ?? false}
-			supportsLabel="Supports images"
-			doesNotSupportLabel="Does not support images"
+			supportsLabel="settings.supportsImages"
+			doesNotSupportLabel="settings.doesNotSupportImages"
 		/>,
 		<ModelInfoSupportsItem
 			key="supportsComputerUse"
 			isSupported={modelInfo.supportsComputerUse ?? false}
-			supportsLabel="Supports computer use"
-			doesNotSupportLabel="Does not support computer use"
+			supportsLabel="settings.supportsComputerUse"
+			doesNotSupportLabel="settings.doesNotSupportComputerUse"
 		/>,
 		!isGemini && (
 			<ModelInfoSupportsItem
 				key="supportsPromptCache"
 				isSupported={modelInfo.supportsPromptCache}
-				supportsLabel="Supports prompt caching"
-				doesNotSupportLabel="Does not support prompt caching"
+				supportsLabel="settings.supportsPromptCache"
+				doesNotSupportLabel="settings.doesNotSupportPromptCache"
 			/>
 		),
 		modelInfo.maxTokens !== undefined && modelInfo.maxTokens > 0 && (
 			<span key="maxTokens">
-				<span style={{ fontWeight: 500 }}>Max output:</span> {modelInfo.maxTokens?.toLocaleString()} tokens
+				<span style={{ fontWeight: 500 }}>{t("settings.maxOutput")}:</span>{" "}
+				{modelInfo.maxTokens?.toLocaleString()} {t("settings.tokens")}
 			</span>
 		),
 		modelInfo.inputPrice !== undefined && modelInfo.inputPrice > 0 && (
 			<span key="inputPrice">
-				<span style={{ fontWeight: 500 }}>Input price:</span> {formatPrice(modelInfo.inputPrice)}/million tokens
+				<span style={{ fontWeight: 500 }}>{t("settings.inputPrice")}:</span> {formatPrice(modelInfo.inputPrice)}
+				/{t("settings.millionTokens")}
 			</span>
 		),
 		modelInfo.supportsPromptCache && modelInfo.cacheWritesPrice && (
 			<span key="cacheWritesPrice">
-				<span style={{ fontWeight: 500 }}>Cache writes price:</span>{" "}
-				{formatPrice(modelInfo.cacheWritesPrice || 0)}/million tokens
+				<span style={{ fontWeight: 500 }}>{t("settings.cacheWritesPrice")}:</span>{" "}
+				{formatPrice(modelInfo.cacheWritesPrice || 0)}/{t("settings.millionTokens")}
 			</span>
 		),
 		modelInfo.supportsPromptCache && modelInfo.cacheReadsPrice && (
 			<span key="cacheReadsPrice">
-				<span style={{ fontWeight: 500 }}>Cache reads price:</span>{" "}
-				{formatPrice(modelInfo.cacheReadsPrice || 0)}/million tokens
+				<span style={{ fontWeight: 500 }}>{t("settings.cacheReadsPrice")}:</span>{" "}
+				{formatPrice(modelInfo.cacheReadsPrice || 0)}/{t("settings.millionTokens")}
 			</span>
 		),
 		modelInfo.outputPrice !== undefined && modelInfo.outputPrice > 0 && (
 			<span key="outputPrice">
-				<span style={{ fontWeight: 500 }}>Output price:</span> {formatPrice(modelInfo.outputPrice)}/million
-				tokens
+				<span style={{ fontWeight: 500 }}>{t("settings.outputPrice")}:</span>{" "}
+				{formatPrice(modelInfo.outputPrice)}/{t("settings.millionTokens")}
 			</span>
 		),
 		isGemini && (
 			<span key="geminiInfo" style={{ fontStyle: "italic" }}>
-				* Free up to {selectedModelId && selectedModelId.includes("flash") ? "15" : "2"} requests per minute.
-				After that, billing depends on prompt size.{" "}
+				{t("settings.geminiPricingInfo").replace(
+					"{requests}",
+					selectedModelId && selectedModelId.includes("flash") ? "15" : "2",
+				)}{" "}
 				<VSCodeLink href="https://ai.google.dev/pricing" style={{ display: "inline", fontSize: "inherit" }}>
-					For more info, see pricing details.
+					{t("settings.seeGeminiPricingDetails")}
 				</VSCodeLink>
 			</span>
 		),
@@ -970,25 +1009,28 @@ const ModelInfoSupportsItem = ({
 	isSupported: boolean
 	supportsLabel: string
 	doesNotSupportLabel: string
-}) => (
-	<span
-		style={{
-			fontWeight: 500,
-			color: isSupported ? "var(--vscode-charts-green)" : "var(--vscode-errorForeground)",
-		}}>
-		<i
-			className={`codicon codicon-${isSupported ? "check" : "x"}`}
+}) => {
+	const { t } = useLanguage()
+	return (
+		<span
 			style={{
-				marginRight: 4,
-				marginBottom: isSupported ? 1 : -1,
-				fontSize: isSupported ? 11 : 13,
-				fontWeight: 700,
-				display: "inline-block",
-				verticalAlign: "bottom",
-			}}></i>
-		{isSupported ? supportsLabel : doesNotSupportLabel}
-	</span>
-)
+				fontWeight: 500,
+				color: isSupported ? "var(--vscode-charts-green)" : "var(--vscode-errorForeground)",
+			}}>
+			<i
+				className={`codicon codicon-${isSupported ? "check" : "x"}`}
+				style={{
+					marginRight: 4,
+					marginBottom: isSupported ? 1 : -1,
+					fontSize: isSupported ? 11 : 13,
+					fontWeight: 700,
+					display: "inline-block",
+					verticalAlign: "bottom",
+				}}></i>
+			{isSupported ? t(supportsLabel) : t(doesNotSupportLabel)}
+		</span>
+	)
+}
 
 export function normalizeApiConfiguration(apiConfiguration?: ApiConfiguration) {
 	const provider = apiConfiguration?.apiProvider || "anthropic"
